@@ -2,17 +2,23 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.feature_selection import SelectKBest, f_regression
 
-def loadData(path='data/forestfires.csv', process='none'):
+def loadData(path='data/forestfires.csv', process='none', logLabels=False):
     data = pd.read_csv(path)
-    X, y = data.iloc[:, :-1], data.iloc[:, -1]
+    X, y = data.iloc[:, :-1], data.iloc[:, -1] # Split attributes and labels
     setDays(X)
     setMonths(X)
     if process == 'scale':
         scaleData(X)
     elif process == 'normalize':
         normalizeData(X)
-    return np.array(X), np.array(y)
+    X = np.array(X) # Turn the DataFrames into Numpy Arrays
+    y = np.array(y)
+    if logLabels: # Apply a logarithmic function on the labels
+        y = np.log(1 + y)
+    return X, y
+
 
 def setDays(data):
     """
@@ -25,6 +31,7 @@ def setDays(data):
         a[data.day == d] = days[d]
     data.day = a
 
+
 def setMonths(data):
     """
     data : pandas DataFrame
@@ -36,6 +43,7 @@ def setMonths(data):
         a[data.month == m] = months[m]
     data.month = a
 
+
 def scaleData(X):
     """
     X : pandas DataFrame with only numerical values
@@ -44,6 +52,7 @@ def scaleData(X):
     M, m = X.max(), X.min()
     for col in X.columns:
         X[col] = (X[col] - m[col])/(M[col] - m[col])
+
 
 def normalizeData(X):
     """
@@ -56,3 +65,22 @@ def normalizeData(X):
             X[col] = 0
         else:
             X[col] = (X[col] - M[col])/S[col]
+
+
+def PCA(A, k):
+    """
+    A : Numpy Array, k : integer
+    Performs PCA on A
+    """
+    M = np.tile(np.average(A, axis=0), (A.shape[0], 1)) # Mean of the columns
+    C = A - M
+    W = np.dot(np.transpose(C), C)
+    _, eigvec = np.linalg.eigh(W)
+    eigvec = eigvec[:,::-1] # eigenvalues in ascending order : colums of U must be reversed
+    Uk = eigvec[:,:k]
+    return np.dot(A, Uk)
+
+def featureSelect(X, y, j):
+    Xnew = SelectKBest(f_regression, k=j).fit_transform(X, y)
+    return Xnew
+    
