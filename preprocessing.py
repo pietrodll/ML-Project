@@ -4,8 +4,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_regression
 
-def loadData(path='data/forestfires.csv', process='none', logLabels=False):
+def loadData(path='data/forestfires.csv', process='none', logLabels=False, shuffle=True):
     data = pd.read_csv(path)
+    if shuffle:
+        data = data.reindex(np.random.permutation(data.index))
+    data = data[data.area > 0]
     X, y = data.iloc[:, :-1], data.iloc[:, -1] # Split attributes and labels
     setDays(X)
     setMonths(X)

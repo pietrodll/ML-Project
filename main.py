@@ -24,7 +24,8 @@ def KNNregression(trainSet, trainLabels, testSet):
 def plotFeatureSelection(X, y):
     error = [0]*X.shape[1]
     for k in range(1, X.shape[1]):
-        Xnew = pre.PCA(X, k)
+        Xnew = pre.featureSelect(X, y, k)
+        # Xnew = pre.PCA(X, k)
         error[k-1] = crossValidation(Xnew, y, KNNregression)
     error[-1] = crossValidation(X, y, KNNregression)
     plt.plot(list(range(1, X.shape[1]+1)), error)
