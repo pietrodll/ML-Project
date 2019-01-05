@@ -3,10 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn import linear_model, neural_network
+from sklearn import linear_model, neural_network, svm
 from validation import crossValidation, plotFeatureSelection
 import preprocessing as pre
-from sklearn import svm
 
 X, y = pre.loadData(process='scale', shuffle=True)
 # X = pre.featureSelect(X, y, 9)
