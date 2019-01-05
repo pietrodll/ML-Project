@@ -26,7 +26,8 @@ def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error,displ
         
         errors.append(error)
         scores.append(r2_score(testLabels, predictedLabels))
-    if(display):
+    
+    if display:
         print('Error : ', np.around(totalError/totalInstances, 5))
         print('Errors : ', np.around(errors, 2))
         print('Scores : ', np.around(scores, 2))
