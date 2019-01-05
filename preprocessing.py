@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_regression
 
-def loadData(path='data/forestfires.csv', process='none', logLabels=False, shuffle=True):
+def loadData(path='data/forestfires.csv', process='none', shuffle=True):
     data = pd.read_csv(path)
     if shuffle:
         data = data.reindex(np.random.permutation(data.index))
-    data = data[data.area > 0]
+    data = data[data.area > 0] #We only take data where the fire has happened
     X, y = data.iloc[:, :-1], data.iloc[:, -1] # Split attributes and labels
     setDays(X)
     setMonths(X)
@@ -18,10 +18,9 @@ def loadData(path='data/forestfires.csv', process='none', logLabels=False, shuff
         normalizeData(X)
     X = np.array(X) # Turn the DataFrames into Numpy Arrays
     y = np.array(y)
-    if logLabels: # Apply a logarithmic function on the labels
-        y = np.log(1 + y)
     return X, y
 
+data = pd.read_csv('data/forestfires.csv')
 
 def setDays(data):
     """
