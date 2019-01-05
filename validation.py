@@ -4,7 +4,7 @@ from sklearn import cross_validation
 from sklearn.metrics import r2_score, mean_squared_log_error, mean_absolute_error, mean_squared_error
 import numpy as np
 
-def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error):
+def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error,display=False):
     kf = cross_validation.KFold(X.shape[0], n_folds=8)
     
     errors = [] # Variable containing errors for each fold
@@ -26,9 +26,9 @@ def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error):
         
         errors.append(error)
         scores.append(r2_score(testLabels, predictedLabels))
-            
-    print('Error : ', np.around(totalError/totalInstances, 5))
-    print('Errors : ', np.around(errors, 2))
-    print('Scores : ', np.around(scores, 2))
+    if(display):
+        print('Error : ', np.around(totalError/totalInstances, 5))
+        print('Errors : ', np.around(errors, 2))
+        print('Scores : ', np.around(scores, 2))
     
     return totalError/totalInstances
