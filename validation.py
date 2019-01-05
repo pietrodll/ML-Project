@@ -3,8 +3,9 @@
 from sklearn import cross_validation
 from sklearn.metrics import r2_score, mean_squared_log_error, mean_absolute_error, mean_squared_error
 import numpy as np
+import matplotlib.pyplot as plt
 
-def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error,display=False):
+def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error, display=False):
     kf = cross_validation.KFold(X.shape[0], n_folds=8)
     
     errors = [] # Variable containing errors for each fold
@@ -33,3 +34,12 @@ def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error,displ
         print('Scores : ', np.around(scores, 2))
     
     return totalError/totalInstances
+
+
+def plotFeatureSelection(X, y, regressionFunction, featureFunction):
+    error = [0]*X.shape[1]
+    for k in range(1, X.shape[1]):
+        Xnew = featureFunction(X, y, k)
+        error[k-1] = crossValidation(Xnew, y, regressionFunction)
+    error[-1] = crossValidation(X, y, regressionFunction)
+    plt.plot(np.arange(1, X.shape[1]+1), error, label=regressionFunction.__name__)

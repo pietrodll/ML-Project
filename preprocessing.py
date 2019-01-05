@@ -69,7 +69,7 @@ def normalizeData(X):
             X[col] = (X[col] - M[col])/S[col]
 
 
-def PCA(A, k):
+def PCA(A, y, k):
     """
     A : Numpy Array, k : integer
     Performs PCA on A
@@ -85,4 +85,8 @@ def PCA(A, k):
 def featureSelect(X, y, j):
     Xnew = SelectKBest(f_regression, k=j).fit_transform(X, y)
     return Xnew
-    
+
+def plotData(X, y):
+    for i in range(X.shape[1]):
+        plt.figure()
+        plt.plot(X[:, i], np.log(y), '+')
