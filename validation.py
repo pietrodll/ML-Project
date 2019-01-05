@@ -5,7 +5,7 @@ from sklearn.metrics import r2_score, mean_squared_log_error, mean_absolute_erro
 import numpy as np
 import matplotlib.pyplot as plt
 
-def crossValidation(X, y, classfunction, errorFunction=mean_absolute_error, display=False):
+def crossValidation(X, y, classfunction, errorFunction=mean_squared_error, display=False):
     kf = cross_validation.KFold(X.shape[0], n_folds=8)
     
     errors = [] # Variable containing errors for each fold

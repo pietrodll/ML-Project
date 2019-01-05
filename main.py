@@ -8,7 +8,7 @@ from validation import crossValidation, plotFeatureSelection
 import preprocessing as pre
 from sklearn import svm
 
-X, y = pre.loadData(process='normalize', shuffle=True)
+X, y = pre.loadData(process='scale', shuffle=True)
 # X = pre.featureSelect(X, y, 9)
 
 def KNNregression(trainSet, trainLabels, testSet):
@@ -40,7 +40,7 @@ def neuralNetwork(trainSet, trainLabels, testSet):
     neu.fit(trainSet,trainLabels)
     return neu.predict(testSet)
 
-regressors = [KNNregression, SVMregression, linearRegression, stochGrad, neuralNetwork]
+regressors = [KNNregression, SVMregression, linearRegression, stochGrad]
 
 def compareRegressors(X, y, regressors, featureFunction=pre.featureSelect):
     plt.figure()

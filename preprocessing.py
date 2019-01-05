@@ -3,6 +3,11 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_regression
+import matplotlib.pyplot as plt
+
+
+data = pd.read_csv('data/forestfires.csv')
+
 
 def loadData(path='data/forestfires.csv', process='none', shuffle=True):
     data = pd.read_csv(path)
@@ -20,7 +25,6 @@ def loadData(path='data/forestfires.csv', process='none', shuffle=True):
     y = np.array(y)
     return X, y
 
-data = pd.read_csv('data/forestfires.csv')
 
 def setDays(data):
     """
@@ -82,9 +86,11 @@ def PCA(A, y, k):
     Uk = eigvec[:,:k]
     return np.dot(A, Uk)
 
+
 def featureSelect(X, y, j):
     Xnew = SelectKBest(f_regression, k=j).fit_transform(X, y)
     return Xnew
+
 
 def plotData(X, y):
     for i in range(X.shape[1]):
