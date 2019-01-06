@@ -7,7 +7,7 @@ from sklearn import linear_model, neural_network, svm
 from validation import crossValidation, plotFeatureSelection
 import preprocessing as pre
 
-X, y = pre.loadData(process='scale', shuffle=True)
+X, y = np.array(pre.X), np.array(pre.y)
 # X = pre.featureSelect(X, y, 9)
 
 def KNNregression(trainSet, trainLabels, testSet):
