@@ -31,34 +31,17 @@ def setDays2(data):
         data[day] = new_column
     data.drop('day', axis=1, inplace=True)
 
-def setWeekend(data):
+def setWeekend(data, deleteDay=True):
     """
     data: pandas DataFrame
     Replaces the day feature by a weekend feature, whose value is 1 if the day is Saturday or Sunday, 0 otherwise.
     """
     new_col = pd.Series(0, index=data.index)
-    new_col[data.day == 'sat'] = 1
-    new_col[data.day == 'sun'] = 1
+    new_col[data['day'].isin(['sat', 'sun'])] = 1
     data['weekend'] = new_col
-    # data.drop('day', axis=1, inplace=True)
+    if deleteDay:
+        data.drop('day', axis=1, inplace=True)
 
-"""
-def loadData(path='data/forestfires.csv', process='none', shuffle=True):
-    data = pd.read_csv(path)
-    if shuffle:
-        data = data.reindex(np.random.permutation(data.index))
-    data = data[data.area > 0] #We only take data where the fire has happened
-    X, y = data.iloc[:, :-1], data.iloc[:, -1] # Split attributes and labels
-    setDays(X)
-    setMonths(X)
-    if process == 'scale':
-        scaleData(X)
-    elif process == 'normalize':
-        normalizeData(X)
-    X = np.array(X) # Turn the DataFrames into Numpy Arrays
-    y = np.array(y)
-    return X, y
-"""
 
 def setDays(data):
     """
@@ -127,7 +110,7 @@ def featureSelect(X, y, j):
     return Xnew
 
 
-def plotData(X, y, features, sepFig=False):
+def plotData(X, y, features=None, sepFig=False, log=False):
     a = np.array(y)
     if features == None:
         colList = X.columns
@@ -138,18 +121,89 @@ def plotData(X, y, features, sepFig=False):
             plt.figure()
             plt.title(col)
         A = np.array(X[col])
-        plt.plot(A, np.log(a), '+', label=col)
-        if len(colList) == 1:
-            plt.title(col)
-        
+        if log:
+            a = np.log(a)
+        plt.plot(A, a, '+', label=col)
+    if not sepFig:
+        plt.legend()
 
+def describeData(X, y, features=None, log=False):
+    """
+    X: pandas DataFrame of the input vectors
+    y: pandas DataFrame of the labels
+    features: list of the features to describe (they have to be categorical)
+    Returns a pandas DataFrame with statistical information about y for each possible value of the feature
+    """
+    if log:
+        a = np.log(y)
+    else:
+        a = y
+    if features == None:
+        colList = X.columns
+    else:
+        colList = features
+    D = pd.DataFrame()
+    for col in colList:
+        values = pd.unique(X[col])
+        for val in values:
+            D[col + ' = ' + str(val)] = a[X[col] == val].describe()
+    return D
+
+
+def setCategorical(X, col, deleteCol=True):
+    """
+    X: pandas DataFrame
+    col: str
+    Generalization of setDays2 and setMonth2
+    """
+    values = pd.unique(X[col])
+    for val in values:
+        new_col = pd.Series(0, index=X.index)
+        new_col[X[col] == val] = 1
+        X[str(val)] = new_col
+    if deleteCol:
+        X.drop(col, axis=1, inplace=True)
+
+
+def setSeason(X, deleteMonth=False):
+    """
+    X: pandas DataFrame
+    Creates a new feature: season. It can have four values (win, spr, sum, and aut) depending on the month
+    """
+    new_col = pd.Series(index=X.index)
+    new_col[X['month'].isin(['dec', 'jan', 'feb'])] = 'win'
+    new_col[X['month'].isin(['mar', 'apr', 'may'])] = 'spr'
+    new_col[X['month'].isin(['jun', 'jul', 'aug'])] = 'sum'
+    new_col[X['month'].isin(['sep', 'oct', 'nov'])] = 'aut'
+    X['season'] = new_col
+    if deleteMonth:
+        X.drop('month', axis=1, inplace=True)
+
+
+def dropConst(X):
+    """
+    X: pandas DataFrame
+    Deletes the columns that have the same value for each input vector
+    """
+    for col in X.columns:
+        if X[col].min() == X[col].max():
+            X.drop(col, axis=1, inplace=True)
 
 X = pd.read_csv('data/forestfires.csv') # Load the dataset
 X = X[X.area > 0] # We only take data where the fire has happened
 y = X['area'] # Extract labels from the dataset
 X.drop('area', axis=1, inplace=True) # Removing the label column from X
-# setMonths2(X)
+
 setWeekend(X)
 
-# scaleData(X)
-# plotData(X, y)
+setSeason(X, deleteMonth=True)
+X['hot'] = pd.Series(0, index=X.index)
+X.loc[X.season.isin(['sum', 'spr']), 'hot'] = 1
+X.drop('season', axis=1, inplace=True)
+
+# setCategorical(X, 'season')
+
+scaleData(X)
+# plotData(X, y, features=['hot'], sepFig=True, log=True)
+
+X1 = X.drop(['X', 'Y', 'rain'], axis=1) # Removing some features

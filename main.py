@@ -8,6 +8,7 @@ from validation import crossValidation, plotFeatureSelection
 import preprocessing as pre
 
 X, y = np.array(pre.X), np.array(pre.y)
+X1 = np.array(pre.X1)
 # X = pre.featureSelect(X, y, 9)
 
 def KNNregression(trainSet, trainLabels, testSet):
@@ -39,7 +40,7 @@ def neuralNetwork(trainSet, trainLabels, testSet):
     neu.fit(trainSet,trainLabels)
     return neu.predict(testSet)
 
-regressors = [KNNregression, SVMregression, linearRegression, stochGrad]
+regressors = [KNNregression, SVMregression, linearRegression, neuralNetwork]
 
 def compareRegressors(X, y, regressors, featureFunction=pre.featureSelect):
     plt.figure()
@@ -47,6 +48,9 @@ def compareRegressors(X, y, regressors, featureFunction=pre.featureSelect):
         plotFeatureSelection(X, y, func, featureFunction)
     plt.legend()
     plt.show()
+
+compareRegressors(X, y, regressors)
+compareRegressors(X1, y, regressors)
 
 def displayResult(X,y,k, regressors, featureFunction):
     Xnew = featureFunction(X, y, k)
