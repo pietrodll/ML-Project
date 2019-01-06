@@ -78,13 +78,17 @@ def scaleData(X):
             X[col] = (X[col] - m[col])/(M[col] - m[col])
 
 
-def normalizeData(X):
+def normalizeData(X, columns='all'):
     """
     X : pandas DataFrame with only numerical values
     This function linearly scales the features of X, to make it centered with a unitary standard deviation
     """
     M, S = X.mean(), X.std()
-    for col in X.columns:
+    if columns == 'all':
+        colList = X.columns
+    else:
+        colList = columns
+    for col in colList:
         if S[col] == 0:
             X[col] = 0
         else:
@@ -165,7 +169,7 @@ def setCategorical(X, col, deleteCol=True):
         X.drop(col, axis=1, inplace=True)
 
 
-def setSeason(X, deleteMonth=False):
+def setSeason(X, deleteMonth=True):
     """
     X: pandas DataFrame
     Creates a new feature: season. It can have four values (win, spr, sum, and aut) depending on the month
@@ -189,21 +193,84 @@ def dropConst(X):
         if X[col].min() == X[col].max():
             X.drop(col, axis=1, inplace=True)
 
-X = pd.read_csv('data/forestfires.csv') # Load the dataset
+
+
+data = pd.read_csv('data/forestfires.csv') # Load the dataset
+
+# Datasets for regression
+
+X = data.copy()
 X = X[X.area > 0] # We only take data where the fire has happened
 y = X['area'] # Extract labels from the dataset
 X.drop('area', axis=1, inplace=True) # Removing the label column from X
+X.drop(['X', 'Y'], axis=1, inplace=True)
 
-setWeekend(X)
+X1 = X.copy()
+X2 = X.copy()
+X3 = X.copy()
 
-setSeason(X, deleteMonth=True)
-X['hot'] = pd.Series(0, index=X.index)
-X.loc[X.season.isin(['sum', 'spr']), 'hot'] = 1
-X.drop('season', axis=1, inplace=True)
-
-# setCategorical(X, 'season')
-
+# First training set
+setDays2(X)
+setMonths2(X)
+dropConst(X)
 scaleData(X)
-# plotData(X, y, features=['hot'], sepFig=True, log=True)
 
-X1 = X.drop(['X', 'Y', 'rain'], axis=1) # Removing some features
+# Second training set
+setWeekend(X1)
+X1['hot'] = pd.Series(0, index=X1.index)
+X1.loc[X1.month.isin(['may', 'jun', 'jul', 'aug', 'sep']), 'hot'] = 1
+X1.drop('month', axis=1, inplace=True)
+scaleData(X1)
+dropConst(X1)
+
+# Third training set
+setSeason(X2)
+setCategorical(X2, 'season')
+setWeekend(X2)
+scaleData(X2)
+dropConst(X2)
+
+# Fourth training set
+X3.drop(['day', 'month', 'FFMC', 'DMC', 'DC', 'ISI'], axis=1, inplace=True)
+scaleData(X3)
+
+
+
+# Datasets for classification
+
+C = data.copy()
+c = C['area'] # Extract labels from the dataset
+c[C.area > 0] = 1
+C.drop('area', axis=1, inplace=True) # Removing the label column from C
+C.drop(['X', 'Y'], axis=1, inplace=True)
+
+C1 = C.copy()
+C2 = C.copy()
+C3 = C.copy()
+
+# First training set
+setDays2(C)
+setMonths2(C)
+dropConst(C)
+scaleData(C)
+
+# Second training set
+setWeekend(C1)
+C1['hot'] = pd.Series(0, index=C1.index)
+C1.loc[C1.month.isin(['may', 'jun', 'jul', 'aug', 'sep']), 'hot'] = 1
+C1.drop('month', axis=1, inplace=True)
+scaleData(C1)
+dropConst(C1)
+
+# Third training set
+setSeason(C2)
+setCategorical(C2, 'season')
+setWeekend(C2)
+scaleData(C2)
+dropConst(C2)
+
+# Fourth training set
+C3.drop(['day', 'month', 'FFMC', 'DMC', 'DC', 'ISI'], axis=1, inplace=True)
+scaleData(C3)
+
+
